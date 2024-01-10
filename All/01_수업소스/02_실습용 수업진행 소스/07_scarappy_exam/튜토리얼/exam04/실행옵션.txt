@@ -1,0 +1,13 @@
+- 여러 결과 출력 파일 만들 때는 -o 옵션 여러개 주면 된다.
+- 결과 출력파일은 디렉토리가 없으면 만들어 준다. (c:\ 이건 안되는 것 같다. : 이 문제 인듯)
+    - output/jl/result.jl   이렇게 경로 두개 해도 만들어 진다. 
+- **로그** 파일의 경우는 디렉토리를 직접 만들고 해야 경로 지정 가능하다. (자동으로 안만든다.=>예외발생)
+
+scrapy crawl scrapinghub 
+    -o output/json/result.json 
+    -o output/jl/result.jl 
+    -o output/pickle/result.pickle 
+    --logfile=log/log.log
+
+
+scrapy crawl scrapinghub -o output/jl/result.jl --logfile=log/log.log

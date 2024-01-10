@@ -1,0 +1,10 @@
+요청 : requests  HTML parsing: BeautifulSoup
+요청 : selenium   HTML parsing: selenium 또는  BeautifulSoup
+요청 HTML parsing : scrapy
+
+요청 url을 알 때 : requests+BS(작은 규모), scrapy(대용량)
+javascript사용, login/logout, 위의 것으로 안될 때 : selenium
+
+link를 계속 타고 가면서 데이터 수집->scrapy
+
+html 파싱하는 방법이 조금씩 다르다. 

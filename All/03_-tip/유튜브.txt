@@ -1,0 +1,11 @@
+1080p 이상의 동영상은 mpeg-dash 형태로 제공
+adaptive 종류중 하나 - 네트웍상황에 맞추어 적절한 비디오 화질을 선택해 서비스 받을 수 있는 것
+저화질은 progressive download streams
+
+yt.streams.filter(progressive=True).all()
+yt.streams.filter(adaptive=True).all()
+yt.streams.filter(only_audio=True).all() #오디오만
+yt.streams.filter(subtype='mp4').all() #mp4만
+yt.streams.filter(subtype='mp4', progressive=True).all() # 멀티필터
+yt.streams.filter(progressive=True).order_by('resolution').desc().all() #정렬
+https://pypi.org/project/pytube/

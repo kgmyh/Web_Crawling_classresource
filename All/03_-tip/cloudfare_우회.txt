@@ -1,0 +1,8 @@
+
+http://devstar21.blogspot.com/2018/04/python-python-crawler-for-avoding.html
+https://github.com/Anorov/cloudflare-scrape
+--사용기
+http://blog.naver.com/PostView.nhn?blogId=binsoore&logNo=221204112042&parentCategoryNo=1&categoryNo=&viewDate=&isShowPopularPosts=true&from=search
+ddos공격 방지 (cloudflare 크롤링 로 구글링)
+갑자기 트래픽이 많아지면 요청된 컴퓨터를 막아버린다.
+그것 우회하기

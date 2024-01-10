@@ -1,0 +1,259 @@
+blog_contents
+"Web scraping projects usually involve data extraction from many websites. The standard approach to tackle this problem is to write some code to navigate and extract the data from each website. However, this approach may not scale so nicely in the long-term, requiring maintenance effort for each website; it also doesn’t scale in the short-term, when we need to start the extraction process in a couple of weeks. Therefore, we need to think of different solutions to tackle these issues. Problem Formulation The problem we propose to solve here is related to   that can be available in HTML form or files, such as PDFs. The catch is that this is required for a few hundreds of different domains and we should be able to scale it up and down without much effort. A brief outline of the problem that needs to be solved: 
+ 
+ 
+ 
+ 
+ 
+ 
+ In terms of the solution, file downloading is already built-in Scrapy, it’s just a matter of finding the proper URLs to be downloaded. A routine for HTML article extraction is a bit more tricky, so for this one, we’ll go with AutoExtract’s  . This way, we can send any URL to this service and get the content back, together with a probability score of the content being an article or not. Performing a crawl based on some set of input URLs isn’t an issue, given that we can load them from some service (AWS S3, for example). Daily incremental crawls are a bit tricky, as it requires us to store some kind of ID about the information we’ve seen so far. The most basic ID on the web is a URL, so we just hash them to get an ID. Last but not least, by building a single crawler that can handle any domain solves one scalability problem but brings another one to the table. For example, when we build a crawler for each domain, we can run them in parallel using some limited computing resources (like 1GB of RAM). However, once we put everything in a single crawler, especially the incremental crawling requirement, it requires more resources. Consequently, it requires some architectural solution to handle this new scalability issue. From the outline above, we can think of three main tasks that need to be performed: 
+ 
+ 
+ 
+ Proposed Architecture By thinking about each of these tasks separately, we can build an   that follows a producer-consumer strategy. Basically, we have a process of finding URLs based on some inputs (producer) and two approaches for data extraction (consumer). This way, we can build these smaller processes to scale arbitrarily with small computing resources and it enables us to scale horizontally if we add or remove domains. An overview of the proposed solution is depicted below. In terms of technology, this solution consists of three spiders, one for each of the tasks previously described. This enables horizontal scaling of any of the components, but URL discovery is the one that can benefit the most from this strategy, as it is probably the most computationally expensive process in the whole solution. The data storage for the content we’ve seen so far is performed by using   Collections (key-value databases enabled in any project) and set operations during the discovery phase. This way, content extraction only needs to get a URL and extract the content, without requiring to check if that content was already extracted or not. The problem that arises from this solution is communication among processes. The common strategy to handle this is a working queue, the discovery workers find new URLs and put them in queues so they can be processed by the proper extraction worker. A simple solution to this problem is to use Scrapy Cloud Collections as a mechanism for that. As we don’t need any kind of pull-based approach to trigger the workers, they can simply read the content from the storage. This strategy works fine, as we are using resources already built-in inside a project in Scrapy Cloud, without requiring extra components. At this moment, the solution is almost complete. There is only one final detail that needs to be addressed. This is related to computing resources. As we are talking about scalability, an educated guess is that at some point we’ll have handled some X millions of URLs and checking if the content is new can become expensive. This happens because we need to download the URLs we’ve seen to memory, so we avoid network calls to check if a single URL was already seen. Though, if we keep all URLs in memory and we start many parallel discovery workers, we may process duplicates (as they won’t have the newest information in memory). Also, keeping all those URLs in memory can become quite expensive. A solution to this issue is to perform some kind of sharding to these URLs. The awesome part about it is that we can split the URLs by their domain, so we can have a discovery worker per domain and each of them needs to only download the URLs seen from that domain. This means we can create a collection for each one of the domains we need to process and avoid the huge amount of memory required per worker. This overall solution comes with a benefit that, if there’s some kind of failure, we can rerun any worker independently, without affecting others (in case one of the websites is down). Also, if we need to re-crawl a domain, we can easily clean the URLs seen in this domain and restart its worker. All in all, breaking this complex process into smaller ones, brings lots of complexity to the table, but allows easy scalability through small independent processes. Tooling Even though we outlined a solution to the crawling problem, we need some tools to build it. Here are the main tools we have in place to help you solve a similar problem: 
+ 
+ 
+ 
+ 
+ Let’s talk about  YOUR  project! With 10+ years of web data extraction experience, our team of 100+ web scraping experts has solved numerous technical challenges like this one above. If your company needs web data, but you don’t have the expertise in-house,  . So you can focus on what matters for you the most!  "
+"We are excited to announce our next  . Using this API, you can get access to product reviews in a structured format, without writing site-specific code. You can use the Product Reviews API to extract product reviews from eCommerce sites at scale. Just make a request to the API and receive your data in real-time! E-commerce Product Reviews data extraction In today’s competitive eCommerce world, product reviews provide a great way for online shoppers to determine what products to buy. Hence, monitoring product reviews are important for businesses. Making use of reviews data, you can find insights in the data that can improve your decision making, address feedback, and monitor customer sentiment. But getting access to structured web data is not easy, especially if you don’t have the right tools. With Product Reviews API, we provide a convenient way for you to extract reviews at scale from any site. Product Reviews data at your fingertips 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ More info about the fields in the  . 
+ 
+ 
+ 
+ 
+ Whichever your use case is, you can always rely on Product Reviews API to deliver high-quality data. Structured Product Reviews data, without coding Before our Product Reviews API, you needed to write a site-specific code to extract reviews or other data. Furthermore, you also needed to maintain the code if the website changed its layout or frontend code. With AutoExtract Product Reviews API, you don’t need to write custom code to extract data. Our AI-based tool will automatically find all the data fields you need and extract it from the page. You just need to submit the target page URLs. Then, you will receive your data in a structured JSON format. How to use Product Reviews API Product Reviews API works the same way as other AutoExtract APIs: 
+ 
+ 
+ Be aware, only the site URL is not enough to extract the data. You need specific   to use the API (Or   to get URL discovery handled for you.) For more information about the API check the  Visual representation of Product Reviews API JSON example This is the format you should expect when using the API Read more about the fields in the  . Try the Product Reviews Beta API Today! Here’s what you need to do if you want to get access to the AutoExtract Product Reviews API beta: 
+ 
+ 
+ Product Reviews API is free for 14 days or until you reach 10K requests (whichever comes sooner). After that, you will be billed $60/month if you don’t cancel your subscription. If you want to try the Product Reviews API Beta,  !"
+"The manual way or the highway... In software testing and QA circles, the topic of whether automated or manual testing is superior remains a hotly debated one. For   QA and validation specifically, they are not mutually exclusive. Indeed, for data, manual QA can inform automated QA, and vice versa. In this post, we’ll give some examples. Pros and cons - manual vs automated tests  It is rare that  can be adequately validated with automated techniques alone; additional manual inspections are often needed. The optimal blend of manual and automated tests depends on factors including: 
+ 
+ 
+ 
+ When considered in isolation, each have their benefits and drawbacks: Automated tests 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Manual tests 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Combining manual and automated validation , when rules are clearly defined and relatively static, this includes things like: 
+ 
+ 
+ 
+ 
+ 
+ 
+ , on the other hand, are invaluable for a deeper understanding of suspected data quality problems, particularly for data extracted from dynamic e-commerce websites and marketplaces.  From a practical point of view, the validation process should start with an understanding of the data and its characteristics. Next, define what rules are needed to validate the data, and automate them. The results of the automation will be warnings and possible false alarms that need to be verified using manual inspection. After the improvement of the rules, the second iteration of automated checks can be executed. Semi-automated techniques Let's suppose we have the task of verifying the extraction coverage and correctness for this website:  The manual way If you try to achieve this task in a fully manual way, then you usually have the following options: 
+ 
+ 
+ 
+ The automated way The same task can be easily done with an automation tool. You will need to spend some time investigating what needs to be extracted, do some tests and voila. However, there are some points to be aware of:  
+ 
+ 
+ 
+ 
+ What is a happy middle ground? To mitigate most of the cons of the manual and automated approaches, we can tackle the task using a semi-automated approach. Study the page, noting that there are 10 results per page and clear pagination: The last page is 10.  Open all pages. You can use browser extensions like If you’d like to build such list you can use excel: defining a template and simple formula:  =$B$1 & A3 & ""/"" Open all links with the above extension. Extracting the data. Now we can extract all quotes per page with a few clicks. For this purpose, we are going to use another browser extension like  . Upon installing the extension, for example, this is how we can extract all authors: Select the name of the first author of the page you are in, right-click on it and then click on “Scrape similar…”: Then you will get the following window opened. Export it elsewhere or simply within the window, use it to compare with the data previously extracted: Lessons Learned Given a scenario of having failing data quality checks towards product data extracted from the web with only tests for prices, the tools and approaches we covered so far since the beginning of our series are capable of detecting different errors like: 
+ 
+ 
+ 
+ 
+ That said, the automated tests can fail to validate and report the wrong price because of a combination of different factors. Just to start, the total dependence on automated validation leads to a false sense of “no errors”, not to mention that if crucial care is not taken such as following the steps we covered in our series so far will lead to lower-than-possible test coverage. The key lesson here is that even when automation is done in the best way possible, it can still fail us due to nuances on the websites, or miss some edge cases like on less than 1% of the data - that’s why it’s important to maintain and support automated tests with manual validations.   Too many false positives or a false sense of “no errors” While building a JSON Schema we can try to be so strict on the data validation rules using as much as the validation definitions rules there are to assert the data to the best possible such as the following for  , for example: {
+    ""type"": ""object"",
+    ""properties"": {
+        ""price"": {
+            ""type"": ""number"",
+            ""minimum"": 0.01,
+            ""maximum"": 20000,
+            ""pattern"": ""^[0-9]\\.[0-9]{2}$""
+        },
+        ""productName"": {
+            ""type"": ""string"",
+            ""pattern"": ""^[\\S ]+$""
+        },
+        ""available"": {
+            ""type"": ""boolean""
+        },
+        ""url"": {
+            ""format"": ""uri"",
+            ""unique"": ""yes""
+        }
+    },
+    ""required"": [
+        ""price"",
+        ""productName"",
+        ""available"",
+        ""url""
+    ]
+}
+ However, every website has a different behaviour, many won’t have the price at all whenever the product is out of stock and it’s expected for our extraction tool to set the price to 0 for such cases so, what’s better? Be more lenient with our tests removing the   validation? No! There’s another approach that we can take with more knowledge of the   possibilities and that is conditionals: {
+    ""type"": ""object"",
+    ""properties"": {
+        ""productName"": {
+            ""type"": ""string"",
+            ""pattern"": ""^[\\S ]+$""
+        },
+        ""available"": {
+            ""type"": ""boolean""
+        },
+        ""url"": {
+            ""format"": ""uri"",
+            ""unique"": ""yes""
+        }
+    },
+    ""if"": {
+        ""properties"": {
+            ""available"": {
+                ""const"": false
+            }
+        }
+    },
+    ""then"": {
+        ""properties"": {
+            ""price"": {
+                ""const"": 0
+            }
+        }
+    },
+    ""else"": {
+        ""properties"": {
+            ""price"": {
+                ""type"": ""number"",
+                ""minimum"": 0.01,
+                ""maximum"": 20000,
+                ""pattern"": ""^[0-9]\\.[0-9]{2}$""
+            }
+        }
+    },
+    ""required"": [
+        ""productName"",
+        ""price"",
+        ""available"",
+        ""url""
+    ]
+}
+ So with this new second schema, we can prevent both the situations of having too many false-positive errors being raised (Happens when using 1st JSON Schema shown above) and also a misleading absence of errors (if we simply removed the minimum tag for price) which could lead us to miss the extraction of price even when the product was in stock due to malfunctioning or changes on the website. Edge cases and relying totally on automation It’s clear that a manual+automated approach is the way to go. Let’s have an example of receiving the following sample data for the extraction of  to assess its quality: Automated tests are able to catch every single one of the values that failed to be extracted that are highlighted in green below (Null/NaN values), however, the following issues in red won’t be caught without an additional step of manual or semi-automated approach: So taking on the possibility of using e.g. Selenium and the data on hands, we can build a script to check the coverage and that if the data extracted was indeed the one available for every single one of the cells: # Preparing the Selenium WebDriver
+import time
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options 
+driver = webdriver.Chrome(executable_path=r""chromedriver"", options=Options())
+driver.get(""http://quotes.toscrape.com/page/1/"")
+time.sleep(15) 
+# Extraction coverage test
+is_item_coverage_ok = df.shape[0] == len(
+    driver.find_elements_by_xpath(""//*[@class='quote']"")
+)
+if is_item_coverage_ok:
+    print(""Extraction coverage is perfect!"")
+else:
+    print(
+        ""The page had ""
+        + str(len(driver.find_elements_by_xpath(""//*[@class='quote']"")))
+        + "" items, however, only ""
+        + str(df.shape[0])
+        + "" were extracted.""
+    )
+# Testing if each column for each row matches the data available on the website
+# And setting the IS_OK column of them accordingly
+for row, x in df.iterrows():
+    is_quote_ok = (
+        x[""quote""]
+        == driver.find_element_by_xpath(
+            ""//div["" + str(x[""position""] + 1) + ""]/span[contains(@class, 'text')]""
+        ).text
+    )
+    is_author_ok = (
+        x[""author""] == driver.find_elements_by_xpath(""//small"")[x[""position""]].text
+    )
+    are_tags_ok = True
+    if isinstance(x[""tags""], list):
+        for tag in x[""tags""]:
+            if isinstance(tag, str):
+                tags = driver.find_elements_by_xpath(""//*[@class='tags']"")[
+                    x[""position""]
+                ].text
+                if tag not in tags:
+                    are_tags_ok = False
+                    break
+            else:
+                are_tags_ok = False
+    else:
+        are_tags_ok = False
+    df.at[row, ""IS_OK""] = is_quote_ok and is_author_ok and are_tags_ok
+driver.close()
+df.style.hide_index()
+ Which returns us the following Pandas DataFrame: This combined approach allowed us to detect 4 additional issues that would have slipped past standard automated data validation. The full Jupyter notebook can be downloaded  . Conclusions In this post, we showed how automated and manual techniques can be combined to compensate for the drawbacks of each and provide a more holistic data validation methodology. In the next post of our series, we’ll discuss some additional data validation techniques that straddle the line between automated and manual. Do you need a High Quality web data extraction solution? At Scrapinghub, we extract billions of records from the web everyday. Our clients use our web data extraction services for  ,  ,   and  among  . If you and your business’ success depends on web data, "
+"As the COVID-19 pandemic took hold, we at Scrapinghub began to wonder how it would impact on the data we crawl, and whether that data could tell us something useful about the pandemic and its impact. Retail price intelligence is one of our key areas of interest. On a daily basis,   for price and stock level information. What insights might be hidden in that data? To explore this, we identified a basket of goods related to pandemic preparedness (eg Face Masks, medications, etc) and began to track the number of individual items available online in this set, and the average item price over time. In the first chart, you can see the overall price (in blue), and the number of individual items (SKU’s, in retail parlance, in red) over time for a collection of US data sources. You can see there is a lot of variation in the number of items on supply as new vendors enter the market with basic items. As you might expect, the price often moves in the opposite direction, as in the dip around April 5th. Basic economics works, but the average price doesn’t drop away as strongly as you might expect. Underlying demand is clearly strong. Note that we aren’t looking at stock levels here, just the range of items in stock and available for purchase. Variation in the number of items available could be due to opportunistic vendors entering the market, or rebranding routine supplies with COVID-19 related keywords. The strength of the underlying demand is such that the overall average price on the basket increased over 40% from March 29th (when we began to track the series) onwards over two months to May 28th. COVID-19 case counts in the US began to lift off in Mid-March, and with   leading that we would expect the ‘normal’ basket price had already risen considerably from its pre-COVID-19 base when we began to track the data.     The interactive map shows the % increase is the average item cost between 1st April and 1st June 2020. You can see that even in a homogeneous market like the US, there is considerable state by state variation in the amount of price increases, with prices more than doubling in some states (Alabama, Wyoming) but showing very modest increases in others (Minnesota). The increases do not seem to correlate with actual observed COVID-19 case levels. The second chart shows the price, overall, and 3 US states, for comparison. You can see the price ‘wobbles’ quite a lot, often with different states not quite in sync. We expected to see lower prices in states with less active cases, but that doesn’t seem to be the case at all, as the fluid US internal market smooths out price variation within a few days, and thus no systematic variation in price. In late May, something peculiar happened, causing the base price to shoot right up. It’s early to tell, but it appears that the number of items available fell away quite quickly in recent days, with items at lower price points becoming simply unavailable. Thus the average item price shot up to nearly $70 as only high priced items were left in stock. We observe this effect varied regionally, with some states, like New York, having little or no impact, and others showing a price spike without much reduction in supply. We hypothesize this may be due to the recent protests and civil disorder in the US affecting supply chains in interesting ways taking certain goods out of supply in certain regions for a few days and triggering a short price shock. This reminds us how retail price intelligence data, combined with stock level data and delivery wait times, can give a deep insight into supply chain vulnerabilities, if you know the right questions to ask. Price Intelligence data can be used for purposes not directly connected to simply setting competitive pricing. Economists tell us price is always a signal, and our data is rich in these signals if we know where to look for them, and can interpret them correctly. If you are interested in extracting COVID-19 related data for research purposes, we can offer our  . If you are interested in   and what data we could provide to help inform your business decisions,  ."
+"Article and news data extraction is becoming increasingly popular and widely used by companies. Data quality plays a vital role in making sure these projects succeed. If the quality of the extracted articles is not good enough, your whole business could be at risk, especially if it depends on the constant flow of high quality article data. Importance of article extraction quality When it comes to web data extraction, data quality is always a key factor. Without high data quality, organizations face increased costs ( ) let alone having their competitive standing undermined.  If you’re looking for an article extraction solution, your top priority should be data quality. You need to know which service or library provides the best article data quality. You need to learn what metrics are important when you  . But also - moving further from general data quality - what measures are important in article extraction and article body extraction quality. Article body extraction quality is crucial if your business depends on this kind of data. If you’re developing a product or software that needs structured article/news data constantly, you need to make sure you choose a solution which can prove they provide the best quality on the market. Why companies need article extraction There are many use cases for article extraction. But one thing is common in each of them: extracting articles from the web gives you a competitive advantage that many companies fail to recognize yet. Web extracted articles and news can make you 
+ 
+ 
+ 
+ 
+ If you want any of these skills in your arsenal, your top priority should be to choose a solution that has the best article extraction quality on the market. Brand monitoring, mentions and sentiment analysis If you have products sold online, there’s probably a lot of discussion around them as well.   their good or bad experiences of a product they bought. These mentions can decide whether future customers buy from you or they choose another brand’s product. Monitoring your brand online and fueling mentions into your business intelligence can improve the way you market, promote and present your products online. It can also show you why people are buying (or not buying) your products. Competitive intelligence, product launches, mergers and acquisitions In today’s competitive market, every piece of additional information about your competitors and their activities is valuable.   invest in competitive intelligence. It’s not enough to know your product and customers, you also need to follow your market and your competitors. What they are doing, what they are up to. Fortunately, there is one thing that still has the power to  : data. Either you’re an investor or just trying to keep track of your competitors, web article extraction can work wonders delivering competitive intelligence at scale. Generating dataset to train machine learning models for NLP Machine learning models depend on data. The more the better. Luckily, the web offers endless amounts of data. But it’s not just volume that matters. Without high quality data your algorithm is . Bad data quality can cause mistaken analytics, poor decision making and unreliable predictions. Web data is often incomplete, inconsistent or inaccurate. And this can be a  for your ML project. Media personalization, summarization, topic extraction, curation Nowadays people publish  everyday on the web. But not all news is relevant for everyone. That’s why we see more and more applications and websites that specialize in   for readers, based on their interests. Time is a valuable asset for everybody. Using these article extraction based solutions, people can only spend time on news that actually matters for them. Business verification and investigation (KYC, KYB) Whether you are providing  (Know-Your-Customer) or KYB (Know-Your-Business) services, or just want to verify a business before engaging in a partnership, getting access in near real-time to related news and articles is important. Developing a quantitative model for stock selection News has always played a significant role within the financial market, but more so with the emergence of  . Economic reports, financial reports or global events can immediately affect the stock market. Thus, in order to make better investing decisions, getting access to articles and news data is essential. With a constant flow of news data, you can improve your quantitative stock selection model. Want to learn more about article extraction quality? We are sharing a deep study comparing article body extraction quality provided by commercial services and open source libraries. We evaluated the quality of article body extraction for Scrapinghub AutoExtract News API and many other commercial services and open source libraries. If you’re interested to learn more about article extraction quality and want to see the comparison of different services, you can  !"
+"The web is complex and constantly changing. It is one of the reasons why web data extraction can be difficult, especially in the long term. It’s necessary to understand how a website works really well, before you try to extract data. Luckily, there are lots of inspection and code tools available for this and in this article we will show you some of our favorites. All major browsers come packed with a set of development tools. Although these have been built with the goal of building websites in mind, they can also be used to analyze web pages and traffic. These are some pretty powerful tools for working with websites. For Google Chrome, these developer tools can be accessed from any page by right-clicking then choosing 'Inspect' or using the shortcut 'CTRL + shift + I' (or '⌘ + Option + I' on macs). You can use these tools to perform some basic operations: Checking the page source Most web pages contain a lot of javascript that needs to be executed before you can see the final output. But you can see how the initial request looks before all of this by checking the page source. To do that you can right-click and then click on 'View page source' or use the shortcuts: Press CTRL + U (⌘ + Option + U) to view source Press CTRL + F (⌘ + Option + F) to search Inspecting traffic Sometimes the information you're looking for is not loaded with the first request. Or perhaps there is an API call that loads the data you need. In order to “catch” these calls, you'll want to see what requests are needed to load a certain page. You can find out this and more in the 'Network' tab. This is what it looks like:   You can filter requests by their url in the 'Filter' input box:     You can also filter requests by type, for example, you can filter for XHR requests. These are endpoints from where js can request resources. There are many other types as well.     You can also clear the request list by pressing this button, this will not reload the page.     Inspecting requests Of course, you'll also need to know the details on individual requests. If you click on any of these you'll be able to see a lot more information such as request and response headers, cookies and the payload used when sending POST requests for example. Let's take a look at one of the requests needed to load the main page of google.   This is the preview of a request, you can see here information such as the status code, url and type. Clicking on this request we can get even more information:   In the new dialog that popped up, you can see the request and response headers. Also, in the 'Preview' and 'Response' tabs you can see the response received for this particular request. Both are very useful for debugging since for JSON API calls, the 'Preview' tab will display an easy to navigate structure while for HTML responses you can view the rendered response or simply the source HTML in the 'Response' tab. The search feature also comes handy sometimes. You can clear your browser cookies and cache from the 'Network' tab, a feature often used when testing how fast a page loads for example, also can be used to clear things such as session ids. Right-click on any request to open this dialog box:   You can also export a request to a curl command by right-clicking on it in this panel then go to copy then Copy as curl. Again, right-click on the request you want and then on the 'Copy' section:     Extensions There are a lot of functionalities you can add for the browser using a few extensions. Our favorites for web scraping:: 
+ 
+ 
+ 
+ Using proxies You should always check how changing your IP influences the page. You may be surprised! On some websites it's important to check how changing your location affects the displayed result (can be fewer items, a redirect or simply getting blocked). For this, you can use several tools such as: 
+ 
+ 
+ If you have lots of extensions like me, you may wonder at some point, how these influence certain requests. You can check how your browser cache changes the loaded page (defaults, cookies, extensions, etc.) by opening the page in an incognito tab Conversely, you can also enable any extension you need in incognito mode from the browser's extension settings. Postman, the REST client Sending requests is easy. UI is pretty intuitive and has lots of features. You have the basic information about your request such as the URL, it's parameters, and headers to fill in. You can also enable or disable each of these as you like for testing. You can of course send POST requests as wee using postman, the only difference is the request body which can be specified in the 'Body' tab where multiple formats are available.   Note that you can leave notes in the description column as additional information about certain parameters. Collections An awesome feature is the ability to store requests for later use, you can create a collection of requests. Just create a new collection and save the request there. With proxies It's also pretty straight forward to configure a proxy for postman. You can use the system settings or a specific proxy with or without login from the settings panel. You can import curl requests into postman (such as those generated from a browser request as I mentioned before). This can save you lots of time by helping you quickly reproduce a request. This can also be done the other way around: export your postman request for curl or python. By default, it will use the requests library so if you need it for  you must change it a bit. Scrapy shell Sometimes you will need to code some logic to extract the data you need. Whether it is testing selectors or formatting data, Scrapy has you covered with the  . This is an interactive shell designed for testing extraction logic for web scraping but it works with python code as well. You need to have Scrapy installed in your python environment: $ pip install scrapy Then you can simply run 'scrapy shell' to start it or you can add an URL as the first parameter and it will send a get request to that. $ scrapy shell $ scrapy shell <URL> # to start with a plain GET request You may now want to check the docs by typing shelp() which will display information about various available objects. One useful feature is the 'view' function which can be called with the response as parameter. Once you are inside the shell, you can use 'fetch' to send a get request for a given url or directly fetch a scrapy request object (which you can later use in your spiders!): Since now you have access to a response object you can also test your selectors. This is a basic example of  and  selectors: Since the shell will use your project's settings it will also make use of existing middleware so you can use these to manage session, bans and more. Learn more about web scraping As you have seen, there are many useful tools that you can use to effectively extract data from the web. Some websites are easier than others, but leveraging these tools should make your life a little easier, even when dealing with complex websites. If you want to learn more about web scraping best practises and how to ensure you can extract data not just now but also in the long term, we have a free downloadable guide that could help you on your web data extraction journey.  "
+"Hassle-Free, Structured, Machine-Readable Job Postings Data  We are excited to announce our newest data extraction API. The   is now out of BETA and publicly available as a stable release.  If you are ready to roll up your sleeves and get started, here are the links you need: 
+ 
+ 
+ While this blog covers most of the notable improvements & extensive testing that the API has undergone, that warrants an exit from Beta, together with some high-level uses; it’s important to remember that we have already covered it  . What Has The Stable Release Of Job Posting API Solved We are moving AutoExtract Job Postings out of beta after making substantial  , completely eliminating several classes of errors, and making  . Aggregator websites where the API had a tendency to return failed requests on the BETA release have now been addressed, paving the way for widespread use. These changes were released to production as part of 20.5.0 Unleash Insights & Drive Business Intelligence (BI) With Job Posting Data If you are looking to discern insights on the activities of organisations of all sizes, from start-ups to Fortune 100 companies, job postings can provide context for analysts to understand the market landscape. Where and how are competitors, suppliers and customers or even the industry, in general, structuring their business. Which technologies they are investing in, which ones they are no longer actively pursuing, what key markets are they pushing into, amongst other things. Technology Buying Signals Derived From Job Postings: A Glimpse Into A Job Posting Data BI Use Case The technology stack of a start-up can (and should) look extremely different from that of a Fortune 1000 company. As organisations grow and evolve, expanding their workforce is a must to answer the on-going demands of the marketplace proactively. This is true to all sectors and industries but especially so in the context of the information technology industry, with so many roles and disciplines that need to be filled amid an ever-changing landscape. Imagine this scenario - an aspiring organisation within the Information Technology (IT) industry wants to expand into new markets. To do this, they need to recruit for a plethora of roles. From hiring cybersecurity professionals to either provide InfoSec support or man the Security Operations Centres (SOC), to  DevOps/IT teams will be needed to deploy & maintain what the software engineers have developed; someone will have to project manage and someone needs to do the administrative heavy lifting.  IT is a competitive market to be in, and surely enough competitors are racing to have a head start. Within this context, business intelligence is paramount to gauge whether our fictitious organisations’ plans are worthwhile in the first place or not. To accomplish this, their insights function needs to understand the recruitment practices of their top 10 competitors that operate a global workforce and have job listings in 100 different countries and 10 different languages - that is 10 x 100 = 1K websites to constantly monitor. With traditional manual scraping techniques, this will amount to a multi-man year-long project.  With Scrapinghub’s  , a steady always-on reliable steam of data into our organisation’s data warehouse and BI platform can be set up in a matter of days/hours/minutes. Master Data Management For The Recruitment Industry Our AutoExtract Job Postings API is tailor-made to answer the demands of the recruitment industry, particularly if data synchronisation between job boards or job aggregators and the individual recruitment agencies databases where uniformity, accuracy, semantic consistency and   reliability is an operational must. Get Machine-Readable, Structured Job Data Without Code! Without our Job Postings API, you would need to write custom code for each job posting page to extract and parse the data. On top of that, you would also have the maintenance overhead and all the troubleshooting that comes with it.  We are continuously improving the underlying machine learning technology, so you can be assured you get the highest quality job data possible. How To Use It? Using the API is simple: 
+ 
+ 
+ 
+ Job Postings Data At Your Disposal Our Job Posting data API is ideal for 
+ 
+ 
+ 
+ 
+ 
+ Some of the data fields you get in your API: 
+ 
+ 
+ 
+ Here’s what you need to do if you want to get access to Job Postings API: 
+ 
+ 
+ 
+ If you want to check out any of our other AutoExtract APIs,  PS: I would appreciate it if you let us know what you think of our new API in the comments."
+"
+ 
+ Generally, there are 3 steps needed to find the best proxy management method for your web scraping project and to make sure you can get data not just today but also in the future, long-term. 3 steps to scale up web scraping 1. Traffic profile You need to define the traffic profile first to determine the concrete needs of your project. What is a traffic profile? It includes, first of all, the   that you're trying to get data from. And also if there's any technical challenges needed to be solved, like JS rendering. The traffic profile also includes the  , meaning how many requests do you want to or need to make per hour or per day. Also do you have any specific time window for the requests, like, for example you want to make all your requests only during work hours, for some reason. Or is it okay to get the data at night, when there's significantly less traffic hitting the site. Then the last thing in the traffic profile is,  . Because sometimes the website displays different content depending on where you are. So you need to use proxies that are in that specific region you need. So these three elements together make the traffic profile: websites, volume and geo locations. Now, with these, you can determine the exact proxy situation that you need a solution for. 2. Proxy pool The next step to scale up is to get a proxy pool. Based on the traffic profile, now you can estimate 
+ 
+ 
+ 
+ You can get access to proxies directly from proxy providers, or through a proxy management solution as well. The drawback of getting proxies directly from providers -and not through a management solution - is that you need to do the managing yourself. There are a lot of things you need to look out for if you go with a provider that doesn’t provide management of proxies. 3. Proxy management The final step is  . Because it's not enough to have just a proxy pool. You also need to use the proxies efficiently. For example, some features that our smart   network has to manage proxies and maximize their value: 
+ 
+ 
+ 
+ 
+ But either you're using Crawlera, or you create your own proxy management solution there are some key points to focus on if you want long-term scalability. Long-term scalability First of all,  . Because if you're extracting data at scale, most probably, you will not have issues with parsing HTML and writing the spider. But you WILL have issues with proxies. That's why it needs to be a priority. Then, if you are managing your own proxies, it's important to keep the proxy pool clean and healthy. If you use a proper management service, it's not a problem, as that handles it for you. Finally, my last point is to   to websites. Ultimately, it is a huge factor when scaling a web scraping project. You don't want to hit websites too hard and you need to make sure you follow the website's rules. But again, if you're using a management tool, you will have a much easier time with proxies because everything is taken care of under the hood, you just need to send requests and extract the data. Learn more If you want to learn more, we have webinars on the topic of   and also about how to  , where we go into more details. And if you want to try Crawlera, the smart proxy network, you can do it for free.  "
+"Why would you even need proxies? But, first let's see why would you even need proxies. When you start extracting data from the web on a small scale you might not need proxies to make successful requests and get the data. But, as you scale your project because you need to extract more records or more frequently, you will experience issues. Or the site you're trying to reach might display different content depending on the region. So these are the two cases when you need to start using a proxy solution. Difference between data center and residential proxies  proxies are much easier to get access to and they are much cheaper. In many use cases, where you cannot extract data without any proxy, you can just start using data center proxies and be able to extract data. Residential proxies are harder to get access to and they are more expensive, because they are provided by actual Internet Service Providers and not data centers. Residential proxies are also higher quality and can work even when data center proxies fail. Which one is better for web scraping? Whether you should use data center or residential proxies in your web data extraction project, it comes down to your situation’s details. There’s no general rule of thumb to decide which type of proxy will work for you. But one thing is for sure: unless you have some special requirements you should start off with data center proxies. Then, based on how it works for you, you can switch to residential proxies if you really need to. Residential proxies are more expensive, thus you will probably be better off using data center proxies, if you can, and applying some techniques to keep your proxy pool clean. Most effective way to use proxies in your web scraping project The biggest issue with residential proxies is, as it was mentioned, they are expensive. So usually the most effective way to scale your web data extraction project, is to try to maximize the value of data center proxies, by being smart about how you actually scrape the web and how you use proxies. Two things, that you can do to achieve this: 
+ 
+ 
+ If you want to learn more about these tactics, I recommend watching our FREE webinar on this:  Learn more If you missed our webinar on the topic of data center proxies and residential proxies don’t worry you will be able to watch it here: If you feel like you know enough already and you don't want to spend way too much time on managing proxies, you can just use an already existing solution for  ."
+"What is Price Intelligence? Price Intelligence is leveraging web data to make better pricing, marketing, and business decisions. Basically, it is all about making use of the available data to optimize your pricing strategy, making it more competitive, increasing profitability, and ultimately, improving your business performance. From competitor monitoring to dynamic pricing and MAP monitoring, web extracted pricing data has endless uses. Brands and e-commerce companies use pricing data to monitor an overall view of the market. Dynamic pricing can be used to make automatic pricing decisions based on competitor’s data combined with internal data so that you always remain profitable. MAP or Minimum Advertising Price monitoring is a technique that uses web extracted data to ensure the resellers and partners are maintaining the pricing according to the company policies. During our webinar on “ ” in June 2020, we had a lot of questions related to the processes and challenges of pricing data extraction. We cover a few important questions here: A: It varies from website to website, but the general idea is to find the pages where such promotion codes are available and build the logic of looking up code and applying it (clicking a button or sending AJAX request) into your extraction code. A: Websites showcase erroneous pricing data when they detect you scraping regularly. This especially happens when you are trying to scale - i.e scrape a lot of products very frequently. Erroneous pricing is not easily recognizable, but comparing the prices or other data fields with previously extracted data and manually checking if there is a big difference in the extracted data can help. The long-term solution for this would be to be smarter about how you scale and be more thoughtful about the   you use. A: Scraping accurate data is all about having a reliable quality assurance process. The first step towards this process is to have a well-defined JSON schema. Your QA process needs to be a balanced combination of automated ways of testing the data as well as manual ways. This blog post gives a detailed description of  . A: For javascript heavy sites, the simplest way would be to inspect the website and see if it uses any hidden APIs that have the data in JSON or other simple formats. This way, you can get the data without executing the javascript. However, sometimes that may not work. In that case, you will need to execute the javascript using a headless browser like   or Selenium or Puppeteer. The challenge here is that it will consume more resources making the process more expensive. A: There are many ways to conduct product matching. The main idea would be to gather as many product-specific parameters as you can about the product that you want to match and then compare those parameters. Eg: For a TV, the product-specific parameters would be resolution, weight, sound, etc. If in comparison, 90% of the parameters of any two products are the same, there is a high chance that it is the same product across two websites. You can build models on this concept to identify product duplication. Want to know more about how you can fuel your price intelligence decisions with web extracted data? Watch this webinar where our Technology Evangelist Attila Toth takes you on a deep dive through the main challenges affecting price intelligence projects from both a business and technical perspective, and more importantly, how you can solve them. If you have any more questions or queries on Price Intelligence data extraction, feel free to leave a comment below and we will try our best to answer them.  "
