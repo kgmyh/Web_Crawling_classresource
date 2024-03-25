@@ -1,0 +1,14 @@
+동물목록
+사자
+3마리
+호랑이
+10마리
+곰
+5마리
+낙타
+6마리
+우리 동물원에는 기린도 30마리 있습니다.
+다른 동물원 URL
+서울 대공원: https://grandpark.seoul.go.kr/main/ko.do
+에버랜드: https://www.everland.com/web/everland/favorite/zootopia/index.html
+코엑스아쿠아리움: https://www.coexaqua.com
