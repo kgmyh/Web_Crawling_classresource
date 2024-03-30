@@ -1,0 +1,24 @@
+[daum_news] INFO: Item to DB Inserted
+2020-07-31 16:22:28 [daum_news] INFO: -------------------------------------------
+2020-07-31 16:22:28 [scrapy.core.scraper] DEBUG: Scraped from <200 https://news.v.daum.net/v/20200731141110272>
+{'article': "조달청은 이번 한 주 동안 국회 국회사무처의 '2020년도 국회 정보화 기반 강화사업' 등 165건, 973억원 "
+            "상당의 신기술·서비스 용역과 해양경찰청의 '2020년 노후 대체 200톤급 경비정 4척 건조' 등 308건, "
+            '2368억원 상당의 물품구매 입찰을 집행한다.',
+ 'article_link': 'https://news.v.daum.net/v/20200731141110272',
+ 'crawled_time': '2020-07-31 16:22:28',
+ 'parent_link': 'https://news.daum.net/breakingnews/digital?page=8',
+ 'title': '[조달청 입찰정보]주간 신기술 용역·물품구매'}
+2020-07-31 16:22:28 [daum_news] INFO: -------------------------------------------
+2020-07-31 16:22:28 [daum_news] INFO: Response From Parent URL : https://news.daum.net/breakingnews/digital?page=8
+2020-07-31 16:22:28 [daum_news] INFO: Child Response URL : https://news.v.daum.net/v/20200731141101267
+2020-07-31 16:22:28 [daum_news] INFO: Child Response Status : 200
+2020-07-31 16:22:28 [daum_news] INFO: -------------------------------------------
+2020-07-31 16:22:28 [daum_news] INFO: Item to DB Inserted
+2020-07-31 16:22:28 [daum_news] INFO: -------------------------------------------
+2020-07-31 16:22:28 [scrapy.core.scraper] DEBUG: Scraped from <200 https://news.v.daum.net/v/20200731141101267>
+{'article': '신종 코로나바이러스 감염증(코로나19) 백신의 지속 시간을 늘리기 위해서는 스파이크 단백질이 아닌 다른 단백질을 '
+            '공략해야 한다는 연구 결과가 나왔다. 현재 개발되고 있는 코로나19 백신은 바이러스 표면의 스파이크 단백질을 항원으로 '
+            '이용한다.',
+ 'article_link': 'https://news.v.daum.net/v/20200731141101267',
+ 'crawled_time': '2020-07-31 16:22:28',
+ 'parent_link': 'https://news.daum.net/brea
