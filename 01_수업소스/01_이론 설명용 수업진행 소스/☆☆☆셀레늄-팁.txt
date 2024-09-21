@@ -1,0 +1,3 @@
+셀레니움
+- webdriver 아닌 것 처럼 요청하는 설정
+    - `options.add_argument("--disable-blink-features=AutomationControlled")
