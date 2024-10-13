@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup
 from webdriver_manager.chrome import ChromeDriverManager
 
 from selenium import webdriver
+
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -26,7 +27,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 url = "https://www.yelp.com/biz/in-n-out-burger-san-francisco?osq=in+n+out"
 # browser 생성 및 url 이동
 service = Service(executable_path=ChromeDriverManager().install())
-browser = webdriver.Chrome(service=service)
+options = webdriver.ChromeOptions()
+options.add_argument("disable-blink-features=AutomationControlled")  # 자동화 탐지 방지
+options.add_argument("User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36")
+
+options.add_experimental_option("excludeSwitches", ["enable-automation"])  # 자동화 표시 제거
+options.add_experimental_option('useAutomationExtension', False)  # 자동화 확장 기능 사용 안 함
+
+service = Service(executable_path=ChromeDriverManager().install()) 
+
+browser = webdriver.Chrome(service=service, options=options)
 browser.get(url)
 
 time.sleep(2)  # 뜰 때까지 시간이 걸림. 댓글은 처음 부터 뜨는 게 아니라 ajax처리 됨.
@@ -35,23 +45,15 @@ comment_elements = WebDriverWait(browser, 10).until(
     EC.presence_of_all_elements_located(
         (
             By.CSS_SELECTOR,
-            "#reviews > section > div.css-1qn0b6x > ul > li > div > div > p > span",
+            "#reviews > section  ul > li > div > div > p > span",
         )
     )
 )
 
 
-star_elements = WebDriverWait(browser, 10).until(
-    EC.presence_of_all_elements_located(
-        (
-            By.CSS_SELECTOR,
-            "#reviews > section > div.css-1qn0b6x > ul > li > div > div> div > div:nth-child(1) > span > div",
-        )
-    )
-)
-soup.select()
 
-print(len(comment_elements), len(star_elements))
+
+print(len(comment_elements))
 
 # time.sleep(3)
-# browser.close()
+browser.close()

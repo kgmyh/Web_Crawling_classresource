@@ -67,15 +67,9 @@ def main():
                         img_tag = td.find("img")
                         if img_tag != None:  # 앞에 이미지(상승,하락) 가 있는 경우.
                             alt_attr = img_tag.get("alt")
-                            if (
-                                alt_attr == None
-                            ):  # <img>에 alt 속성이 없는 경우=>상한가/하한가 이미지. (<img>는 있는데 alt가 없다. 이미지이름 도 ico_up02, ico_down02.jpg 이다. -> 네이버 증권 메뉴중 상한가/하한가 메뉴에서 확인한다.
+                            if alt_attr == None:  # <img>에 alt 속성이 없는 경우=>상한가/하한가 이미지. (<img>는 있는데 alt가 없다. 이미지이름 도 ico_up02, ico_down02.jpg 이다. -> 네이버 증권 메뉴중 상한가/하한가 메뉴에서 확인한다.
                                 # <img>의 src 속성값을 조회
-                                alt_attr = (
-                                    "상한"
-                                    if img_tag.get("src").endswith("ico_up02.jpg")
-                                    else "하한"
-                                )
+                                alt_attr = "상한" if img_tag.get("src").endswith("ico_up02.jpg") else "하한"
                             txt = alt_attr + txt
                     elif idx == 12:
                         continue

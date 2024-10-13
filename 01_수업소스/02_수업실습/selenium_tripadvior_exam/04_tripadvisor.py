@@ -2,10 +2,13 @@ import time
 
 from selenium.webdriver import Chrome
 from selenium.webdriver import ChromeOptions
+from selenium.webdriver.chrome.service import Service
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+from webdriver_manager.chrome import ChromeDriverManager
 # WaitWebDriver는 처음 로딩후에만 사용한다. 이미 있는 element에 내용만 들어가는 경우는 내용이 나올때 까지기다리지 않으므로 결국 time.sleep()을 사용해야 할 것 같다.
 url = 'https://www.tripadvisor.co.kr/Restaurant_Review-g294197-d3200324-Reviews-or50-Jungsik-Seoul.html'
 
@@ -17,10 +20,21 @@ url = 'https://www.tripadvisor.co.kr/Restaurant_Review-g294197-d3200324-Reviews-
 
 url = 'https://www.tripadvisor.co.kr/Restaurant_Review-g294197-d3200324-Reviews-or50-Jungsik-Seoul.html'
 
+options = ChromeOptions()
 
-driver = Chrome()
+options = ChromeOptions()
+options.add_argument("--disable-blink-features=AutomationControlled")  # 자동화 탐지 방지
+options.add_argument("User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36")
+
+options.add_experimental_option("excludeSwitches", ["enable-automation"])  # 자동화 표시 제거
+options.add_experimental_option('useAutomationExtension', False)  # 자동화 확장 기능 사용 안 함
+
+service = Service(executable_path=ChromeDriverManager().install()) 
+
+driver = Chrome(service=service, options=options)
 driver.get(url)
 wait = WebDriverWait(driver, 10)
+
 #마지막 페이지 번호 - div.pageNumbers > a:last-child
 a_tag = wait.until(EC.presence_of_element_located([By.CSS_SELECTOR,'div.pageNumbers > a:last-child']))
 print(a_tag.text)
@@ -57,9 +71,9 @@ for i in range(last_page-1):
     time.sleep(1) #다음 페이지로 이동할 때 까지의 기다린다.
 
 #for문 종료
-driver.close()    
+# driver.close()    
 
- 
-print(len(comments))
+
+print(len(comment_list))
 for i in range(10):
-    print(comments[i])
+    print(comment_list[i])
