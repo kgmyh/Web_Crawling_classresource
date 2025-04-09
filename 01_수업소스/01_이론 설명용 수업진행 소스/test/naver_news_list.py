@@ -14,4 +14,3 @@ if res.status_code == 200:
     print(len(a_list))
     for a_tag in a_list:
         print(a_tag["href"], a_tag.text)
-        break
